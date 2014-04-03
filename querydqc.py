@@ -18,14 +18,14 @@ Requirements:
 
 Port forwarding Access 
 dbi_vista="host=apm45.ast.cam.ac.uk dbname=vista user=vuser 
- password=dqc_user port=5432"
+ password=???? port=5432"
 
 On a muon e.g. muon2 type: ssh -L 5432:apm45:5432 calx042
 
 On local machine: ssh -L 5432:127.0.0.1:5432 muon2
 
 On local machine:
-dbi_vista="host=127.0.0.1 dbname=vista user=vuser password=dqc_user port=5432"
+dbi_vista="host=127.0.0.1 dbname=vista user=vuser password=??? port=5432"
 
 
 Caveats:
@@ -79,14 +79,60 @@ try:
 except:
     import psycopg
 
+
+from argparse import ArgumentParser
+
+
+parser = ArgumentParser(
+  description='Search CASU DQC database')
+
+default_db='vista'
+
+default_outfile='/tmp/tmp.fits'
+
+default_sqlfile='querydqc.sql'
+
+parser.add_argument("-d", "--db", dest="db", 
+                  default=default_db, 
+                  help="name of CASU DQC database [wfcam, vista, vst]")
+
+parser.add_argument("-o", "--outfile", dest="outfile", 
+                  default=default_outfile, 
+                  help="output filename")
+
+parser.add_argument("-q", "--query", dest="sqlfile", 
+                  default=default_sqlfile, 
+                  help="SQL query filename")
+
+
+args = parser.parse_args()
+
+db=args.db
+
+# Output file
+#output = sys.argv[1]
+
+# Output file
+output = args.outfile
+
+print('Output file: ',output)
+
+
 import ConfigParser
 config = ConfigParser.RawConfigParser()
+
+# Open and read the file as a single buffer
+sqlfile=args.sqlfile
+fh = open(sqlfile, 'r')
+sql = fh.read()
+fh.close()
+
+print 'sql: ', sql
+
+
+
+# read database connection info from config file
 config.read('querydqc.cfg')
-
-db='wfcam'
-db='vista'
-db='vst'
-
 
 host = config.get(db,'host')
 dbname = config.get(db,'dbname')
@@ -150,8 +196,6 @@ class odict(UserDict):
     def values(self):
         return map(self.get, self._keys)
 
-# Output file
-output = sys.argv[1]
 
 logdata='Current working directory: %s' % (os.getcwd())
 print logdata
@@ -171,27 +215,9 @@ print logdata
 
 #dbi_vista="host=apm45.ast.cam.ac.uk dbname=vista user=vuser password=dqc_user port=5432"
 
-#host = config.get(db,'host')
-#dbname = config.get(db,'dbname')
-#user = config.get(db,'user')
-#password = config.get(db,'password')
-#port = config.get(db,'port')
-
 dbi="host=" + host + " dbname=" + dbname + " user=" + user + " password=" + password +  " port=" + port
 
 print 'dbi: ', dbi
-
-#dbi_vista="host=" + host + " dbname=" + dbname + " user=" + user + " password=" + password +  " port=" + port
-
-#print 'dbi_vista: ', dbi_vista
-
-#dbi_vst="host=apm45.ast.cam.ac.uk dbname=vst user=vuser password=dqc_user port=5432"
-
-
-
-#dbi=dbi_wfcam
-#dbi=dbi_vista
-#dbi=dbi_vst
 
 """
 # Query. We could read this from a file. These tests could be added
@@ -537,7 +563,7 @@ SELECT
 FROM 
   vstqc
 WHERE
-  prog = '177.A-3011'
+  /* prog = '177.A-3011' */
   /* AND is_stack = 'True' */
   AND chipno = 1
   /* LIMIT 100000 */
@@ -545,17 +571,28 @@ WHERE
 
 query12a="""
 SELECT 
-  is_stack, is_tile, naxis1, naxis2, version, chipno, dateobs, nightobs
+  is_stack, is_tile, naxis1, naxis2, version, chipno, dateobs, nightobs, prog
 FROM 
   vstqc
-WHERE
-  prog = '177.A-3011'
-  /* AND is_stack = 'True' */
-  /* AND chipno = 1  */
+WHERE 
+  /* prog = '177.A-3011' */ 
+  is_stack = 'True' 
+  AND chipno = 1 
   /* LIMIT 100000 */
 """
 
-
+query12aa="""
+SELECT 
+  *
+FROM 
+  vstqc
+WHERE 
+  /* surveyname = 'ATLAS' */
+  prog = '177.A-3011'
+  /* is_stack = 'True'   */
+  /* AND chipno = 1 */
+  /* LIMIT 100000 */
+"""
 
 query12b="""
 SELECT 
@@ -586,9 +623,8 @@ month = "201208"
 progid  =  "179.A-2010"
 
 #print "Program ID: " + progid + " ;" + month
-print "Program ID: %s ;%s" % (progid, month)
+#print "Program ID: %s ;%s" % (progid, month)
 #print """Program ID: %s ;%s""" % (progid, month)
-
 
 
 query201208="""
@@ -611,6 +647,7 @@ query=query_all_pawprints_thin
 
 # vst
 query=query12a
+query=sql
 
 print 'sql: ', query
 
