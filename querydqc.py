@@ -87,6 +87,7 @@ parser = ArgumentParser(
   description='Search CASU DQC database')
 
 default_db='vista'
+default_db='vst'
 
 default_outfile='/tmp/tmp.fits'
 
@@ -123,6 +124,7 @@ config = ConfigParser.RawConfigParser()
 
 # Open and read the file as a single buffer
 sqlfile=args.sqlfile
+print('Reading: ',sqlfile)
 fh = open(sqlfile, 'r')
 sql = fh.read()
 fh.close()
@@ -637,17 +639,19 @@ WHERE
   /* VHS */
   AND prog = '179.A-2010'
 """ 
+
+query=sql
 #% (month, progid)
 
-query=query201208
-query=query10a
-query=query_all_tiles_thin
-query=query_all_pawprints_thin
+#query=query201208
+#query=query10a
+#query=query_all_tiles_thin
+#query=query_all_pawprints_thin
 #query=query11b
 
 # vst
-query=query12a
-query=sql
+#query=query12a
+#query=sql
 
 print 'sql: ', query
 
