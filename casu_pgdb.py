@@ -30,6 +30,7 @@ config = ConfigParser.RawConfigParser()
 
 db='vst'
 db='vista'
+db='wfcam-new'
 
 config.read('querydqc.cfg')
 
@@ -43,7 +44,7 @@ dbi="host=" + host + " dbname=" + dbname + " user=" + user + " password=" + pass
 print 'dbi: ', dbi
 
 DATABASE_HOST = '127.0.0.1'
-DATABASE_NAME = "vista"
+DATABASE_NAME = "wfcam"
 SCHEMA = 'postgres'
 USER_NAME = 'test'
 PASSWORD = 'root'
