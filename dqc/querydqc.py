@@ -141,9 +141,9 @@ def getargs(verbose=False):
 
 
     default_db='vista'
-    default_db='vst'
-    default_outfile='/tmp/tmp.fits'
+    #default_db='vst'
     default_sqlfile='querydqc.sql'
+    default_outfile='/tmp/tmp.fits'
 
     parser.add_argument("-d", "--db", dest="db",
                         default=default_db,
